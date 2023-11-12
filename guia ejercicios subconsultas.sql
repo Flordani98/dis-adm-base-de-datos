@@ -61,3 +61,36 @@ asociados. (Utilizando ALL o ANY).*/
 SELECT nombre, codigo
 FROM departamento
 WHERE codigo <> ALL(SELECT codigo_departamento FROM empleado WHERE codigo_departamento IS NOT NULL);
+
+/*1.2.7.3 Subconsultas con IN y NOT IN*/
+
+/*8. Devuelve los nombres de los departamentos que tienen empleados
+asociados. (Utilizando IN o NOT IN).*/
+
+SELECT nombre 
+FROM departamento
+WHERE codigo IN (SELECT codigo_departamento FROM empleado WHERE codigo_departamento IS NOT NULL);
+
+/*9. Devuelve los nombres de los departamentos que no tienen empleados
+asociados. (Utilizando IN o NOT IN).*/
+
+SELECT nombre
+FROM departamento
+WHERE codigo NOT IN(SELECT codigo_departamento FROM empleado WHERE codigo_departamento IS NOT NULL);
+
+
+ /*1.2.7.4 Subconsultas con EXISTS y NOT EXISTS*/
+ 
+ /*10.Devuelve los nombres de los departamentos que tienen empleados
+asociados. (Utilizando EXISTS o NOT EXISTS).*/
+
+SELECT nombre
+FROM departamento d
+WHERE EXISTS(SELECT codigo_departamento FROM empleado e WHERE d.codigo = e.codigo_departamento);
+
+/*11. Devuelve los nombres de los departamentos que no tienen empleados
+asociados. (Utilizando EXISTS o NOT EXISTS).*/
+
+SELECT nombre
+FROM departamento d
+WHERE NOT EXISTS(SELECT codigo_departamento FROM empleado e WHERE d.codigo = e.codigo_departamento);
