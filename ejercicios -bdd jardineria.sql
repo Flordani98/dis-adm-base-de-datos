@@ -148,3 +148,115 @@ SELECT *
 FROM cliente
 WHERE ciudad like 'madrid' AND codigo_empleado_rep_ventas IN (11,30);
 
+-- 1.4.5 Consultas multitabla (Composición interna)
+
+/*1. Obtén un listado con el nombre de cada cliente y el nombre y apellido
+de su representante de ventas.*/
+SELECT c.nombre_cliente, e.nombre, e.apellido1
+FROM cliente c
+INNER JOIN empleado e ON  c.codigo_empleado_rep_ventas = e.codigo_empleado;
+
+/*2. Muestra el nombre de los clientes que hayan realizado pagos junto con
+el nombre de sus representantes de ventas.*/
+
+select c.codigo_cliente, c.nombre_cliente, e.nombre
+FROM pago p
+INNER JOIN cliente c ON p.codigo_cliente = c.codigo_cliente
+INNER JOIN empleado e ON e.codigo_empleado = c.codigo_empleado_rep_ventas;
+
+/*3. Muestra el nombre de los clientes que no hayan realizado pagos junto
+con el nombre de sus representantes de ventas.*/
+
+/*No encontre la forma de hacerlo sin subconsultas*/
+-- No funciona
+SELECT DISTINCT c.nombre_cliente, c.codigo_cliente
+FROM pago p, cliente c
+INNER JOIN empleado e ON e.codigo_empleado = c.codigo_empleado_rep_ventas
+WHERE p.codigo_cliente != c.codigo_cliente;
+
+
+-- Utilzando subconsultas:
+SELECT  c.nombre_cliente, c.codigo_cliente
+FROM cliente c, empleado e
+WHERE c.codigo_cliente != ALL(SELECT codigo_cliente from pago)
+AND e.codigo_empleado = c.codigo_empleado_rep_ventas
+;
+
+-- Utilzando INNER JOIN y subconsultas:
+SELECT  c.nombre_cliente, c.codigo_cliente
+FROM cliente c
+INNER JOIN empleado e ON e.codigo_empleado = c.codigo_empleado_rep_ventas
+WHERE c.codigo_cliente != ALL(SELECT codigo_cliente from pago)
+;
+
+/*4. Devuelve el nombre de los clientes que han hecho pagos y el nombre de
+sus representantes junto con la ciudad de la oficina a la que pertenece
+el representante.*/
+SELECT c.nombre_cliente, c.codigo_cliente, e.nombre, o.ciudad
+FROM pago p
+INNER JOIN cliente c ON p.codigo_cliente = c.codigo_cliente
+INNER JOIN empleado e ON e.codigo_empleado = c.codigo_empleado_rep_ventas
+INNER JOIN oficina o ON o.codigo_oficina = e.codigo_oficina;
+
+/*5. Devuelve el nombre de los clientes que no hayan hecho pagos y el
+nombre de sus representantes junto con la ciudad de la oficina a la que
+pertenece el representante.
+*/
+
+SELECT  c.nombre_cliente, c.codigo_cliente, e.nombre, o.ciudad
+FROM cliente c
+INNER JOIN empleado e ON e.codigo_empleado = c.codigo_empleado_rep_ventas
+INNER JOIN oficina o ON o.codigo_oficina = e.codigo_oficina
+WHERE c.codigo_cliente != ALL(SELECT codigo_cliente from pago)
+;
+
+/*6. Lista la dirección de las oficinas que tengan clientes en Fuenlabrada*/
+
+SELECT DISTINCT o.codigo_oficina, o.linea_direccion1, c.ciudad 
+FROM oficina o
+INNER JOIN empleado e ON o.codigo_oficina = e.codigo_oficina
+INNER JOIN cliente c ON c.codigo_empleado_rep_ventas = e.codigo_empleado
+WHERE c.ciudad like 'Fuenlabrada';
+
+/*7. Devuelve el nombre de los clientes y el nombre de sus representantes
+junto con la ciudad de la oficina a la que pertenece el representante.*/
+
+SELECT c.nombre_cliente, e.nombre, o.ciudad
+FROM cliente c
+INNER JOIN empleado e ON e.codigo_empleado = c.codigo_empleado_rep_ventas
+INNER JOIN oficina o ON o.codigo_oficina = e.codigo_oficina;
+
+/*8. Devuelve un listado con el nombre de los empleados junto con el
+nombre de sus jefes.*/
+SELECT e.nombre, e.apellido1, e.codigo_empleado, s.codigo_empleado AS codigo_jefe , s.nombre AS nombre_jefe
+FROM empleado s
+INNER JOIN empleado e ON e.codigo_jefe = s.codigo_empleado
+order by e.codigo_empleado;
+
+/*9. Devuelve un listado que muestre el nombre de cada empleados, el
+nombre de su jefe y el nombre del jefe de sus jefe.*/
+SELECT e.nombre, e.codigo_empleado, s.nombre AS nombre_jefe, s.codigo_empleado AS codigo_jefe, t.nombre AS nombre_jefe_de_jefe, t.codigo_empleado AS codigo_jefe_de_jefe
+FROM empleado e
+INNER JOIN empleado s ON e.codigo_jefe = s.codigo_empleado
+INNER JOIN empleado t ON s.codigo_jefe = t.codigo_empleado
+;
+
+/*10.Devuelve el nombre de los clientes a los que no se les ha entregado a
+tiempo un pedido.*/
+
+SELECT DISTINCT c.nombre_cliente, c.codigo_cliente
+FROM cliente c
+INNER JOIN pedido p ON p.codigo_cliente = c.codigo_cliente
+WHERE p.fecha_entrega > p.fecha_esperada
+ORDER BY c.codigo_cliente;
+
+/*11. Devuelve un listado de las diferentes gamas de producto que ha
+comprado cada cliente.*/
+
+SELECT DISTINCT p.gama, c.nombre_cliente
+FROM producto p
+INNER JOIN detalle_pedido dp ON dp.codigo_producto = p.codigo_producto
+INNER JOIN pedido pe ON pe.codigo_pedido = dp.codigo_pedido
+INNER JOIN cliente c ON pe.codigo_cliente = c.codigo_cliente
+ORDER BY c.nombre_cliente
+;

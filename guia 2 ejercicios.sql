@@ -412,21 +412,22 @@ order by d.nombre);
 asociado y los departamentos que no tienen ningún empleado asociado.
 Ordene el listado alfabéticamente por el nombre del departamento.*/
 
-/*NO FUNCIONA EL ORDER CON EL UNION*/
+/*NO FUNCIONA EL ORDER CON EL UNION, FUNCIONA COLOCANDO EL NUMERO DE COLUMNA*/
 (
 select *
 from empleado e
 left join departamento d on d.codigo = e.codigo_departamento
 where e.codigo_departamento is null
 )
-
 UNION
 (
 select e.codigo, e.nif, e.nombre, e.apellido1, e.apellido2, e.codigo_departamento, d.codigo, d.nombre, d.presupuesto, d.gastos
 from departamento d
 left join empleado e on e.codigo_departamento = d.codigo
 where e.codigo is null
-);
+
+)
+order by 8 DESC;
 
 /*RESOLUCiON DEL CAMpus:*/
 SELECT e.*, d.*
