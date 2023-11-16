@@ -30,7 +30,7 @@ select * from departamento;
 
 SELECT * 
 FROM empleado
-WHERE salario > (SELECT AVG(salario) FROM empleado)
+WHERE salario > (SELECT AVG(salario) FROM empleado WHERE oficio LIKE 'VENDEDOR')
 AND oficio != 'presidente';
 
 
